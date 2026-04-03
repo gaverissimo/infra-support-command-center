@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Infrastructure Support Command Center – practical troubleshooting cheat sheet for IT support engineers (L1–L3).">
+    <title>Infra Support Command Center</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Orbitron:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050508;
+            --card-bg: #0d1117;
+            --neon-blue: #00e5ff;
+            --neon-pink: #ff007f;
+            --text-main: #a9b7c6;
+            --text-heading: #ffffff;
+            --border-glow: rgba(0, 229, 255, 0.4);
+            --border-glow-pink: rgba(255, 0, 127, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-heading);
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Nav Sidebar */
+        nav {
+            position: sticky;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, #090b12 0%, #050508 100%);
+            border-right: 1px solid rgba(0, 229, 255, 0.2);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        nav::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 3px;
+        }
+
+        .nav-logo {
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--border-glow);
+            margin-bottom: 2rem;
+            line-height: 1.4;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            border-left: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            display: block;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--neon-blue);
+            border-left: 2px solid var(--neon-blue);
+            background: rgba(0, 229, 255, 0.05);
+            text-shadow: 0 0 8px var(--border-glow);
+        }
+
+        /* Main Content */
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        /* Header Statistics */
+        .stats-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 3rem;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: 4px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+        }
+
+        .stat-box:nth-child(even)::before {
+            background: linear-gradient(90deg, transparent, var(--neon-pink), transparent);
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 229, 255, 0.15);
+        }
+
+        .stat-box:nth-child(even):hover {
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.15);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 5px var(--border-glow);
+        }
+
+        .stat-box:nth-child(even) .stat-value {
+            color: var(--neon-pink);
+            text-shadow: 0 0 5px var(--border-glow-pink);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-main);
+        }
+
+        /* Main Container Layout */
+        .grid {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            nav {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .nav-links a {
+                padding: 4px 8px;
+                border-left: none;
+                border-bottom: 2px solid transparent;
+            }
+
+            .nav-links a:hover,
+            .nav-links a.active {
+                border-left: none;
+                border-bottom: 2px solid var(--neon-blue);
+            }
+        }
+
+        /* Card Setup */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.4s ease forwards;
+            min-height: 40vh;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--neon-blue);
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .card:hover::after {
+            width: 100%;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 229, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 229, 255, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .card-header h2 {
+            font-size: 1.2rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--border-glow);
+        }
+
+        .card:nth-child(3n) .card-header h2 {
+            color: var(--neon-pink);
+            text-shadow: 0 0 5px var(--border-glow-pink);
+        }
+
+        .card:nth-child(3n)::after {
+            background: var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .card:nth-child(3n):hover {
+            border-color: rgba(255, 0, 127, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 0, 127, 0.05);
+        }
+
+        /* Content inside card */
+        .category-title {
+            color: #d1d5db;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 2px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .command-list {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .command-list li {
+            margin-bottom: 0.6rem;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: flex-start;
+            line-height: 1.3;
+        }
+
+        .command-list li::before {
+            content: '>';
+            color: var(--neon-blue);
+            margin-right: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+        }
+
+        .card:nth-child(3n) .command-list li::before {
+            color: var(--neon-pink);
+        }
+
+        .cmd {
+            color: #00ff66;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .concept {
+            color: #e6e6e6;
+        }
+
+        .desc {
+            color: #7a8a9e;
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Tools Section Glow */
+        .tools-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: auto;
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .card:nth-child(3n) .tools-section {
+            border-left-color: var(--neon-pink);
+        }
+
+        .tools-section h4 {
+            font-size: 0.85rem;
+            color: #fff;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .tools-section h4::before {
+            content: '[]';
+            margin-right: 5px;
+            color: var(--neon-blue);
+        }
+
+        .card:nth-child(3n) .tools-section h4::before {
+            color: var(--neon-pink);
+        }
+
+        .tool-item {
+            margin-bottom: 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .tool-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .tool-name {
+            color: var(--neon-blue);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .card:nth-child(3n) .tool-name {
+            color: var(--neon-pink);
+        }
+
+        .tool-desc {
+            color: #b0c4de;
+            display: block;
+            margin-bottom: 3px;
+            line-height: 1.3;
+        }
+
+        .tool-features {
+            color: #8c9baf;
+            font-size: 0.75rem;
+            padding-left: 10px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            line-height: 1.3;
+        }
+
+        /* Neon separator */
+        .neon-separator {
+            height: 2px;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            margin: 2rem 0;
+            box-shadow: 0 0 10px var(--neon-blue);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-logo">
+            INFRA SUPPORT<br>COMMAND CENTER
+            <div style="font-size: 0.65rem; color: #7a8a9e; margin-top: 8px; font-weight: normal; letter-spacing: 0; text-shadow: none; font-family: 'Fira Code', monospace; line-height: 1.4;">
+                Version: v1.0<br>
+                Last updated: April 2026
+            </div>
+        </div>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="#mod-01">01 Fundamentals & ITIL</a></li>
+            <li><a href="#mod-02">02 Networking</a></li>
+            <li><a href="#mod-03">03 DNS Troubleshooting</a></li>
+            <li><a href="#mod-04">04 Windows Commands</a></li>
+            <li><a href="#mod-05">05 Linux Quick Triage</a></li>
+            <li><a href="#mod-06">06 VPN Troubleshooting</a></li>
+            <li><a href="#mod-07">07 Citrix Support</a></li>
+            <li><a href="#mod-08">08 Monitoring</a></li>
+            <li><a href="#mod-09">09 Virtualization</a></li>
+            <li><a href="#mod-10">10 Security Checks</a></li>
+            <li><a href="#mod-11">11 SQL Queries</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Header Statistics -->
+        <div class="stats-header">
+            <div class="stat-box">
+                <div class="stat-value">11</div>
+                <div class="stat-label">Módulos</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value"><span id="real-cmd-count">0</span>+</div>
+                <div class="stat-label">Comandos / Ações</div>
+            </div>
+            <div class="stat-box"
+                title="L1 (Service Desk), L2 (N1 Support), L3 (Specialized), L4 (SysAdmin/Architecture)">
+                <div class="stat-value">L1&rarr;L4</div>
+                <div class="stat-label">Níveis de Suporte</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Enterprise Troubleshooting Coverage</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">Win+Lin</div>
+                <div class="stat-label">OS Support</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">x86_64</div>
+                <div class="stat-label">Support</div>
+            </div>
+        </div>
+
+        <div class="neon-separator"></div>
+
+        <!-- content grid -->
+        <div class="grid">
+
+            <!-- Module 01 -->
+            <div class="card" id="mod-01">
+                <div class="card-header">
+                    <h2>01 Fundamentals & ITIL Workflow</h2>
+                </div>
+
+                <div class="category-title">Support Workflow & Processes</div>
+                <ul class="command-list">
+                    <li>
+                        <div>
+                            <span class="concept">Troubleshooting Mindset</span>
+                            <span class="desc">Aja com base em evidências (logs). Isole o problema central antes de
+                                aplicar soluções "bala de prata".</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">OSI Reference Model Quick Check</span>
+                            <span class="desc">L1 (Físico) -> L2 (MAC) -> L3 (IP) -> L4 (Porta TCP/UDP) -> L7 (App
+                                HTTP).</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">Incident Mgmt (Break-fix)</span>
+                            <span class="desc">Foco total em restaurar o serviço o mais rápido possível ao usuário
+                                (Resolução de contorno permitida).</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">Problem Mgmt (Root Cause)</span>
+                            <span class="desc">Ação investigativa: Por que o incidente aconteceu? Achar a causa para
+                                evitar que volte de forma definitiva.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">Change Mgmt (RFC)</span>
+                            <span class="desc">Controle de ambiente: Planejamento, Rollback e Impacto visualizados e
+                                aprovados antes de alterar a infra.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Priorização & SLAs</div>
+                <ul class="command-list">
+                    <li>
+                        <div>
+                            <span class="concept">Priority Matrix</span>
+                            <span class="desc">Cruzamento cego de <strong style="color:#ff007f">Urgência</strong> (Tempo
+                                necessário para o negócio parar) x <strong style="color:#ff007f">Impacto</strong> (Danos
+                                do negócio / Nº de Usuários).</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">SLA Awareness</span>
+                            <span class="desc">Acordo de Nível de Serviço. Entenda e monitore tempos tolerados de
+                                Resposta e Solução evitando estouro de contratos corporativos.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Documentation Pattern</div>
+                <ul class="command-list">
+                    <li>
+                        <div>
+                            <span class="concept">Symptom</span>
+                            <span class="desc">Registrar o que exatamente falhou ou travou na percepção do usuário
+                                requisitante.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">Scope</span>
+                            <span class="desc">Dimensione o dano. Afeta só a máquina da sala X ou o link inteiro
+                                corporativo?</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">Root cause</span>
+                            <span class="desc">Investigação real provada em logs de por que a falha original foi
+                                iniciada.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">Fix</span>
+                            <span class="desc">Ação exata executada em terminal ou painel para contornar ou eliminar
+                                totalmente o problema.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <span class="concept">Prevention</span>
+                            <span class="desc">O que faremos agora: Adicionar alerta? Redundância? Rotina de backup
+                                modificada?</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">RCA (Root Cause Analysis)</span>
+                        <span class="tool-desc">Frequente em "Problems". Usa métodos como os 5-Whys e diagrama de
+                            Ishikawa.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">Knowledge Base & ITSM</span>
+                        <span class="tool-desc">ServiceNow, Jira Service Management, GLPI. Garantem visibilidade global
+                            dos tickets e SLAs.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 02 -->
+            <div class="card" id="mod-02">
+                <div class="card-header">
+                    <h2>02 Networking</h2>
+                </div>
+
+                <div class="category-title">The Connectivity Ladder</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">ping 127.0.0.1</span> <span class="desc">Testa se a própria placa do PC
+                                responde (Pilha TCP/IP OK?).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ping local IP</span> <span class="desc">Testa se conectou na porta LAN
+                                local.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ping gateway</span> <span class="desc">Testa se o PC alcança o roteador
+                                (porta da rede pra fora). Se o gateway falhar, isolamento local.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ping DNS</span> <span class="desc">Testa se é possível contatar a máquina
+                                listada nos resolvadores de nome DHCP (interno ou provedor).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ping internet</span> <span class="desc">Testa a conexão saltando o
+                                gateway, usando IP limpo sem DNS (ex: ping 8.8.8.8).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ping destination</span> <span class="desc">Testa alcançar a aplicação ou
+                                máquina final (ex: ping srv-erp-01).</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">DNS vs Network Detection Trick</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept"><code>ping 8.8.8.8</code> works MAS <code>ping google.com</code>
+                                fails = DNS Issue!</span> <span class="desc">Se ping direto pra IP responde limpo, o
+                                link de internet e a placa de rede (Routing) estão 100% íntegros. O servidor DNS não
+                                consegue traduzir os nomes.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Port Testing Checklist</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">Test-NetConnection host -Port 443</span> <span class="desc">(Windows
+                                Powershell) Retorna detalhadamente "TcpTestSucceeded : True" se a porta abrir ping
+                                localmente.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">nc -zv host 443</span> <span class="desc">(Linux/Mac) Zero-I/O Netcat
+                                testa silenciosamente se a porta remota TCP atende sockets no host.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">telnet host 443</span> <span class="desc">Diagnóstico de Socket clássico.
+                                Se ficar "Connection refused", há bloqueio de FireWall ou daemon caído.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Estrutura Local (Gateway, ARP e Rotas)</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">ipconfig /all | ip a</span> <span class="desc">Identifica local IP,
+                                Gateway Padrão e DNS Server local.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">arp -a</span> <span class="desc">MAC cache: Tabela descobrindo Quem é
+                                quem na LAN. Essencial pra diagnosticar duplicação de IPs locais.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">route print | ip route</span> <span class="desc">Mapeia Tabela de
+                                Roteamento interna (garante que X gateway empurra para X rota corporativa interna vs
+                                Internet).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">tracert / traceroute</span> <span class="desc">Mapeia hops até o destino
+                                final informando a latência individual por Hop. Causa de loop de roteador.</span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">Wireshark</span>
+                        <span class="tool-desc">Analisa pacotes da rede interceptando frames (DNS, TCP, TLS,
+                            HTTP).</span>
+                        <div class="tool-features">latência • pacotes perdidos • falha DNS • handshake TLS • timeouts
+                        </div>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">PingPlotter</span>
+                        <span class="tool-desc">Visualiza a perda de pacotes e latência entre "hops" através de gráficos
+                            mantidos.</span>
+                        <div class="tool-features">VPN lenta • link instável • jitter • problemas ISP</div>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">Advanced IP Scanner</span>
+                        <span class="tool-desc">Inventaria e descobre ativos que estão mortos mas responderão porta ICMP
+                            limitados subnets locais.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 03 -->
+            <div class="card" id="mod-03">
+                <div class="card-header">
+                    <h2>03 DNS Troubleshooting</h2>
+                </div>
+
+                <div class="category-title">Local Cache Troubleshooting</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">ipconfig /flushdns</span> <span class="desc">Limpa cache DNS local
+                                (resolve stale records).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ipconfig /displaydns</span> <span class="desc">Mostra o cache DNS local
+                                atualmente armazenado na máquina.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ipconfig /registerdns</span> <span class="desc">Força o registro e
+                                renovação do IP no DNS AD.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Query Troubleshooting</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">nslookup google.com</span> <span class="desc">Consulta usando o DNS
+                                padrão configurado na máquina alvo.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">nslookup google.com 8.8.8.8</span> <span class="desc">Força a consulta
+                                utilizando um DNS específico/diferente.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">dig +trace google.com</span> <span class="desc">(Linux/macOS/WSL)
+                                Consulta DNS excelente demonstrando o caminho e autoridades da zona.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">DNS Resolution Flow & Logic</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Resolution Flow</span> <span class="desc">1. Hosts file &rarr; 2. DNS
+                                cache &rarr; 3. Local DNS server &rarr; 4. External DNS server.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Quick DNS Detection Logic</span> <span
+                                class="desc"><code>ping 8.8.8.8 works</code> MAS <code>ping google.com fails</code> =
+                                Garantia de problema no DNS!</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Active Directory DNS Issues</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">User cannot login domain</span> <span class="desc">Use
+                                <code>ipconfig /all</code>. <strong>Esperado:</strong> O DNS é o IP do Domain
+                                Controller. <strong>NUNCA:</strong> DNS apontando pra 8.8.8.8 publicamente (em ambiente
+                                AD a autenticação quebra).</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Record Type Troubleshooting</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">A</span> <span class="desc">hostname &rarr; IPv4</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">AAAA</span> <span class="desc">hostname &rarr; IPv6</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">MX</span> <span class="desc">mail routing (Responsável pelo destino
+                                de e-mails corporativos).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">CNAME</span> <span class="desc">alias (Apelido apontando para um
+                                record A).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">NS</span> <span class="desc">name server (Servidor que tem a
+                                autoridade sobre uma zona).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">TXT</span> <span class="desc">Múltiplos usos (Geralmente SPF / regras
+                                de envio de e-mails blindado / Domain Verifications).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">SRV</span> <span class="desc">domain services (Essencial para Login
+                                de Active Directory achar os serviços corporativos).</span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">DNS Benchmark</span>
+                        <span class="tool-desc">Testa performance DNS apontando o mais rápido/estável na sua rede
+                            atual.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">dig</span>
+                        <span class="tool-desc">Ferramenta indispensável no terminal Linux/macOS.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">nslookup</span>
+                        <span class="tool-desc">Busca rápida nativa. Entre usando comando limpo pra definir
+                            <code>set type=mx</code>.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 04 -->
+            <div class="card" id="mod-04">
+                <div class="card-header">
+                    <h2>04 Windows Commands</h2>
+                </div>
+
+                <div class="category-title">Network Troubleshooting</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">ipconfig /all</span> <span class="desc">Visualiza interface IP completa
+                                (hostname, DHCP, DNS, MAC).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">Test-NetConnection host -Port 443</span> <span class="desc">Testa portas
+                                remotas. Diagnostica firewalls bloqueando saída.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">netstat -ano</span> <span class="desc">Lista conexões abertas e associa
+                                PIDs (Process IDs) locais.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Processes & Services</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">Get-Service</span> <span class="desc">Lista estado atual de todos os
+                                serviços via terminal.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">Restart-Service spooler</span> <span class="desc">Reinicia rapidamente um
+                                serviço travado (Ex: fila de impressão).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">services.msc</span> <span class="desc">Executa a janela gráfica para
+                                gerenciar todos os Serviços.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">taskmgr / resmon</span> <span class="desc">Task Manager ou Resource
+                                Monitor (análise visual de disco alto).</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">User & AD Troubleshooting</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">Test-ComputerSecureChannel -Repair</span> <span class="desc">Tenta
+                                restabelecer a comunicação quebrada com o AD Domain Controller.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">dsregcmd /status</span> <span class="desc">Checa status do registro da
+                                máquina perante o Entra ID (Azure AD).</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Logs, Diagnostics & Disks</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">eventvwr.msc</span> <span class="desc">Chama o Event Viewer (Procure logs
+                                vermelhos sob System e Application).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">diskmgmt.msc</span> <span class="desc">Chama Gerenciamento de Disco para
+                                resolver partições RAW ou pendentes.</span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">Process Explorer (Sysinternals)</span>
+                        <span class="tool-desc">Mostra processos detalhados, árvores de execução, handles e DLLs
+                            abertas.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">Autoruns (Sysinternals)</span>
+                        <span class="tool-desc">Analisa programas e serviços que iniciam com o Windows. (Caça
+                            malwares/lentidão).</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">PsExec</span>
+                        <span class="tool-desc">Executa comandos remotamente em servidores corporativos na mesma
+                            rede.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 05 -->
+            <div class="card" id="mod-05">
+                <div class="card-header">
+                    <h2>05 Linux Quick Triage</h2>
+                </div>
+
+                <div class="category-title">Server Quick Health Checklist</div>
+                <ul class="command-list">
+                    <li>
+                        <div style="font-size: 0.75rem; color: #7a8a9e; margin-bottom: 8px;"><strong>Use when:</strong>
+                            server slow • freezing • service down • disk full • SSH slow</div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">uptime</span> <span class="desc">Detecta tempo online (reboot
+                                inesperado?) e o Load Average original.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">top | htop</span> <span class="desc">Top exibe cru. htop (se instalado) é
+                                superior pra caçar consumo de CPU.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">free -h</span> <span class="desc">Análise crua e exata de consumo de
+                                memória RAM e Swap alocado.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">df -h</span> <span class="desc">Exibe se o disco local/partições estourou
+                                o limite bloqueando o sistema.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">systemctl --failed</span> <span class="desc">Aponta cirurgicamente quais
+                                deamons (serviços) quebraram no momento.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">journalctl -xe</span> <span class="desc">Varre as últimas linhas do event
+                                log do sistema cruzando todos serviços.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Diretórios Críticos e Logs</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">/home</span> e <span class="concept">/tmp</span> <span
+                                class="desc">Perfis de usuário e lixo temporário (culpados por HD cheio).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">/usr/bin</span> e <span class="concept">/var/www</span> <span
+                                class="desc">Binários executáveis do sistema e root web padrão (Nginx/Apache).</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">tail -f /var/log/syslog</span> <span class="desc">Assista os alertas
+                                gerais do servidor em tempo real rolando na tela.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">cat /var/log/apache2/error.log</span> <span class="desc">Lê histórico de
+                                logs críticos caso um webserver caia.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Processes, Services, Network & SSH</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">ps aux | grep nome</span> <span class="desc">Isola o print de um processo
+                                alvo investigando seu PID atual.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">systemctl list-units --type=service</span> <span class="desc">Lista os
+                                serviços habilitados.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">systemctl restart nginx</span> <span class="desc">Reinício brusco de um
+                                daemon travado.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">systemctl status ssh</span> <span class="desc">Garante que o acesso
+                                remoto não está morto.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">netstat -tulpn</span> <span class="desc">Ver portas abertas escutando
+                                tráfego no kernel.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">tail -f /var/log/auth.log</span> <span class="desc">Monitora tentativas
+                                de login frustradas via SSH (brute-force).</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Disk Troubleshoot & Permissions</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">du -h --max-depth=1</span> <span class="desc">Escaneia recursivamente do
+                                diretório atual listando as pastas mais pesadas.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">ls -lah</span> <span class="desc">Detalha os bits de permissões visíveis
+                                e o dono/grupo de quem é o arquivo alvo.</span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">strace</span>
+                        <span class="tool-desc">Intercepta as chamadas de sistema (system calls) que um processo
+                            emperrado faz buscando arquivos invisíveis.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">lsof -i / lsof -p PID</span>
+                        <span class="tool-desc">Descobre portas em uso e arquivos lockados por causa raiz ou zumbis
+                            (Open Files).</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 06 -->
+            <div class="card" id="mod-06">
+                <div class="card-header">
+                    <h2>06 VPN Troubleshooting</h2>
+                </div>
+
+                <div class="category-title">Connection & IP State</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Connection State</span> <span class="desc">A interface vitual subiu
+                                no SO? Use <code>ping IP_GATEWAY_VPN</code> para garantir túnel estabelecido.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div><span class="concept">IP Assignment</span> <span class="desc"><code>ipconfig /all</code>
+                                (Win) ou <code>ip a</code> (Lin). A máquina pegou IP correto no Pool da empresa?</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Routing & DNS</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Routing Issues</span> <span class="desc"><code>route print</code>
+                                (Win) ou <code>ip route</code> (Lin). A subrede da empresa foi injetada nativamente
+                                pós-login?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">DNS Issues</span> <span
+                                class="desc"><code>nslookup server.corp</code>. Você resolve domínios da empresa?
+                                (Conflito entre DNS Corporativo vs Wi-fi Local).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">MTU Issues</span> <span
+                                class="desc"><code>ping SERVER -f -l 1300</code>. Sintoma: RDP/SSH cai, sistemas pesados
+                                travam (Pacote MTU grande demais engarrafando no túnel criptografado).</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Auth & Certificates</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Authentication Issues</span> <span class="desc">Cheque validade da
+                                senha no AD (<code>net user xyz /domain</code>) e fluxo de MFA (Authenticator push
+                                expirado gera Auth-Timeout).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Certificates / Always-On</span> <span class="desc">Chame
+                                <code>certmgr.msc</code>. O certificado pessoal/máquina foi revogado, ou CA raiz não é
+                                confiada no PC?</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Testing & Signals</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Quick Tests</span> <span class="desc">1. <code>ping 8.8.8.8</code>
+                                (Sua internet funciona?) &rarr; 2. Conecta VPN &rarr; 3. <code>ping SERVER_CORP</code>
+                                (Alcança lá?).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Escalation Signals</span> <span class="desc">Problema global caindo
+                                juntos? Provedor bloqueando UDP/IPSec (CGNAT)? Escalone com L3 (Engenharia de
+                                Redes/Firewall).</span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">Client Logs (App Specifics)</span>
+                        <span class="tool-desc">Foque em investigar os arquivos de LOG do cliente. Ex: Cisco AnyConnect
+                            / FortiClient / OpenVPN Logs. (Win: olhe Event Viewer).</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 07 -->
+            <div class="card" id="mod-07">
+                <div class="card-header">
+                    <h2>07 Citrix Workspace Support (Endpoint)</h2>
+                </div>
+
+                <div class="category-title">Client-Side Troubleshooting</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Session Launch Issues</span> <span class="desc">O App/Desktop clica e
+                                nada abre? Verifique cache local ou arquivo .ICA sendo associado errado no
+                                Windows.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Profile & Performance</span> <span class="desc">Lentidão
+                                extrema/Mouse travando? Valide se há picos de CPU no Notebook do usuário. (O Workspace
+                                espelha as telas usando recursos locais).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Network & VPN Dependency</span> <span class="desc">Sessão caiu
+                                "Connecting..." infinitamente? O Citrix depende 100% da VPN estar up com a port de
+                                Firewall "443" liberta pro CTX Gateway.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Critical Reset Procedures</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">Workspace &rarr; Advanced Pref. &rarr; Reset Workspace</span> <span
+                                class="desc">Gatilho Ouro! Resolve: Cache de ICA corrompido, perfis com configs antigas,
+                                Store quebrada e tokens inválidos locais.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">Login Loops / Auth Failures</span> <span class="desc">Abre e fecha
+                                pedindo senha sem parar? Vá em <strong>Credential Manager</strong> do Win e apague
+                                senhas listadas como 'Citrix/Workspace'.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Workspace Local Client Logs</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">AppData Trace</span> <span
+                                class="desc"><code>%localappdata%\Citrix\Workspace</code></span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">ProgramFiles Trace</span> <span
+                                class="desc"><code>C:\Program Files (x86)\Citrix\ICA Client</code></span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Flags Ocultas</span> <span class="desc">Gere os logs e aplique Ctrl+F
+                                buscando os erros raiz: <em>"SSL failure"</em>, <em>"timeout"</em>, <em>"store
+                                    unreachable"</em>, e <em>"authentication issue"</em>.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Escalation Signals</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Global Drops</span> <span class="desc">Múltiplos usuários não abrem
+                                os Apps ao mesmo tempo? Broker em pânico? Escalone à time de virtualização (L3).</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">HDX Monitor</span>
+                        <span class="tool-desc">App insubstituível na máquina do analista. Varre perdas de USB
+                            redirecionado, Gráficos HDX travados, e Impressoras mortas dentro do túnel.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">Citrix Director (Visão Infra)</span>
+                        <span class="tool-desc">Painel Web Corporativo. Útil pelo suporte N1 para derrubar (Reset)
+                            "BrokerSessions" grudadas no Limbo do server afetando um user.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 08 -->
+            <div class="card" id="mod-08">
+                <div class="card-header">
+                    <h2>08 Monitoring Systems</h2>
+                </div>
+                <div class="category-title">Conceitos Essenciais</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Metric Monitoring</span> <span class="desc">Acompanhamento contínuo
+                                de recursos: CPU, RAM, IO e latency.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Log Monitoring</span> <span class="desc">Busca inteligente de logs
+                                focada em rastrear erros de aplicação.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Availability Monitoring</span> <span class="desc">Health-checks
+                                primários. O host / painel está Up ou Down?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Synthetic Monitoring</span> <span class="desc">Simula a jornada do
+                                usuário final gerando cliques e requisições para medir sucesso na ponta.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Infrastructure Monitoring Tools</div>
+                <div style="overflow-x: auto; margin-bottom: 20px;">
+                    <style>
+                        .mon-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 0.85rem;
+                            text-align: left;
+                            background: rgba(15, 23, 42, 0.4);
+                            border-radius: 6px;
+                        }
+
+                        .mon-table th {
+                            background: rgba(0, 229, 255, 0.1);
+                            padding: 10px;
+                            font-weight: 600;
+                            color: #00e5ff;
+                            border-bottom: 1px solid #1e293b;
+                        }
+
+                        .mon-table td {
+                            padding: 10px;
+                            border-bottom: 1px solid #1e293b;
+                            color: #cbd5e1;
+                        }
+
+                        .mon-table tr:last-child td {
+                            border-bottom: none;
+                        }
+
+                        .mon-table tr:hover td {
+                            background: rgba(255, 121, 198, 0.05);
+                        }
+
+                        .mon-link {
+                            color: #ff79c6;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }
+
+                        .mon-link:hover {
+                            text-decoration: underline;
+                        }
+
+                        .forum-link {
+                            color: #94a3b8;
+                            font-size: 0.75rem;
+                            text-decoration: none;
+                            border: 1px solid #334155;
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                        }
+
+                        .forum-link:hover {
+                            color: #00e5ff;
+                            border-color: #00e5ff;
+                        }
+                    </style>
+                    <table class="mon-table">
+                        <thead>
+                            <tr>
+                                <th>Tool</th>
+                                <th>Foco Principal</th>
+                                <th>Target / Perfil</th>
+                                <th>Licença / Ambiente</th>
+                                <th>Suporte & Fórum Oficial</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://uptrace.dev/" target="_blank" class="mon-link">Uptrace</a></td>
+                                <td>Observability (Tracing/APM)</td>
+                                <td>Cloud-Native</td>
+                                <td>Open Source<br /><span
+                                        style="font-size:0.7rem; color:#64748b">Cloud/On-Premise</span></td>
+                                <td><a href="https://github.com/uptrace/uptrace/discussions" target="_blank"
+                                        class="forum-link">GitHub</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.datadoghq.com/" target="_blank" class="mon-link">Datadog</a>
+                                </td>
+                                <td>Full-Stack APM</td>
+                                <td>Large Enterprises</td>
+                                <td>Paid<br /><span style="font-size:0.7rem; color:#64748b">Cloud</span></td>
+                                <td><a href="https://www.datadoghq.com/community/" target="_blank"
+                                        class="forum-link">Community</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.nagios.org/" target="_blank" class="mon-link">Nagios</a></td>
+                                <td>Infrastructure</td>
+                                <td>Custom Monitoring</td>
+                                <td>Free/Paid<br /><span style="font-size:0.7rem; color:#64748b">On-Premise</span></td>
+                                <td><a href="https://support.nagios.com/forum/" target="_blank"
+                                        class="forum-link">Nagios Forum</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.zabbix.com/" target="_blank" class="mon-link">Zabbix</a></td>
+                                <td>Infrastructure</td>
+                                <td>Enterprise</td>
+                                <td>Free<br /><span style="font-size:0.7rem; color:#64748b">On-Premise</span></td>
+                                <td><a href="https://www.zabbix.com/forum" target="_blank" class="forum-link">Zabbix
+                                        Forum</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.solarwinds.com/" target="_blank" class="mon-link">SolarWinds
+                                        NPM</a></td>
+                                <td>Network Performance</td>
+                                <td>Enterprise</td>
+                                <td>Paid<br /><span style="font-size:0.7rem; color:#64748b">On-Premise</span></td>
+                                <td><a href="https://thwack.solarwinds.com/" target="_blank"
+                                        class="forum-link">THWACK</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.paessler.com/prtg" target="_blank" class="mon-link">PRTG</a>
+                                </td>
+                                <td>All-in-One</td>
+                                <td>Small-Medium Business</td>
+                                <td>Paid<br /><span style="font-size:0.7rem; color:#64748b">On-Premise</span></td>
+                                <td><a href="https://kb.paessler.com/" target="_blank" class="forum-link">Paessler
+                                        KB</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.splunk.com/" target="_blank" class="mon-link">Splunk</a></td>
+                                <td>Log Analysis & SIEM</td>
+                                <td>Security/Compliance</td>
+                                <td>Paid<br /><span style="font-size:0.7rem; color:#64748b">Cloud/On-Premise</span></td>
+                                <td><a href="https://community.splunk.com/" target="_blank" class="forum-link">Splunk
+                                        Answers</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://prometheus.io/" target="_blank" class="mon-link">Prometheus</a>
+                                </td>
+                                <td>Metrics Time-Series</td>
+                                <td>Cloud-Native</td>
+                                <td>Free<br /><span style="font-size:0.7rem; color:#64748b">On-Premise</span></td>
+                                <td><a href="https://prometheus.io/community/" target="_blank"
+                                        class="forum-link">Prometheus Hub</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://newrelic.com/" target="_blank" class="mon-link">New Relic</a></td>
+                                <td>Application APM</td>
+                                <td>Application Performance</td>
+                                <td>Paid<br /><span style="font-size:0.7rem; color:#64748b">Cloud</span></td>
+                                <td><a href="https://forum.newrelic.com/" target="_blank" class="forum-link">Explorers
+                                        Hub</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://grafana.com/" target="_blank" class="mon-link">Grafana</a></td>
+                                <td>Visualization Dashboards</td>
+                                <td>Dashboard Creation</td>
+                                <td>Free/Paid<br /><span style="font-size:0.7rem; color:#64748b">On-Premise/Cloud</span>
+                                </td>
+                                <td><a href="https://community.grafana.com/" target="_blank" class="forum-link">Grafana
+                                        Forum</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">snmpwalk / zabbix_get</span>
+                        <span class="tool-desc">Consultar toda a árvore OID de equipamentos diretamente via CLI ou
+                            requisitar chaves cruas de agente.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 09 -->
+            <div class="card" id="mod-09">
+                <div class="card-header">
+                    <h2>09 Virtualization Basics</h2>
+                </div>
+
+                <div class="category-title">Ações e Checagens Críticas</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="concept">Snapshot Consolidation</span> <span class="desc">Snapshots antigos
+                                aumentam o delta disk chain &rarr; causa extremo impacto em I/O e enche silenciosamente
+                                a LUN/Datastore.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Hyper-V Checkpoints</span> <span class="desc">Acumulados aumentam o
+                                Differencing Disk (VHDX), destruindo storage local e engasgando a performance da VM
+                                hosteada.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">VMTools / Guest Additions</span> <span class="desc">Instalação
+                                outdated causa problema crônico na rede, clock drift (tempo dessincronizado), mouse lag
+                                no console e recusa ao tentar "graceful shutdown".</span></div>
+                    </li>
+                    <li>
+                        <div><span class="concept">Virtual Switch / VLAN ID</span> <span class="desc">A placa subiu mas
+                                sem internet? Verifique a vNIC para garantir que o Port Group ou a VLAN Tag está setada
+                                com ID correto.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Quick VM Troubleshooting Flow</div>
+                <ul class="command-list">
+                    <li>
+                        <div style="font-size: 0.75rem; color: #7a8a9e; margin-bottom: 8px;"><strong>Isolar problemas na
+                                orquestração:</strong> VM Down, Ping Failure, Unreachable:</div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">1. Ping VM</span> <span class="desc">Responde ICMP nativo ou bloqueio
+                                local de FW?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">2. Ping Gateway</span> <span class="desc">Abra o VM Console. De lá de
+                                dentro, o SO dela enxerga o roteador virtual?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">3. ipconfig / ip a</span> <span class="desc">A máquina "perdeu a placa
+                                virtual"? Ganhou um APIPA (169.254)?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">4. Check VMTools status</span> <span class="desc">Visão Infra: O pacote
+                                de tools está rodando (Running) injetando IP no painel?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">5. Check Snapshot usage</span> <span class="desc">A VM congelou porque
+                                existe rotina de backup de terceiro (Veeam) consolidando disco?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">6. Check Datastore space</span> <span class="desc">O LUN/Storage central
+                                morreu com 0 bytes e pausou todas as VMs simultaneamente?</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">7. Check VLAN Port Group</span> <span class="desc">A VM migrou de pool
+                                viva (vMotion) mas a placa conectou num Switch Virtual órfão?</span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">VMware vSphere Client</span>
+                        <span class="tool-desc">Portal oficial do Host Hypervisor ESXi/vCenter usado para manipular
+                            hardware virtual alocado live (adicionar RAM/Disco).</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">VMware Tools / VirtualBox Guest Additions</span>
+                        <span class="tool-desc">Kernel modules rodando por dentro da Guest injetando vídeo fluido e
+                            permitindo controle do Hypervisor.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">Hyper-V Manager | PowerShell</span>
+                        <span class="tool-desc"><code>Get-VM | format-table</code> para coletar via scripts status
+                            críticos de máquinas presas e processadores enroscados.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 10 -->
+            <div class="card" id="mod-10">
+                <div class="card-header">
+                    <h2>10 Security Quick Checks</h2>
+                </div>
+
+                <div class="category-title">Security Status (Win)</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">Get-MpComputerStatus</span> <span class="desc">Verificar saúde do
+                                Defender: <code>AntivirusEnabled</code>, <code>RealTimeProtectionEnabled</code> e
+                                <code>SignatureLastUpdated</code>.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">managed-bde -status</span> <span class="desc">Checagem de BitLocker.
+                                Detectar se: Recovery Mode está ativo, disco criptografado parcialmente ou Protector
+                                removido.</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">SSH Security & Login Attempts (Linux)</div>
+                <ul class="command-list">
+                    <li>
+                        <div><span class="cmd">tail -f /var/log/auth.log</span> <span class="desc">Obrigatório! Detecta
+                                logs de SSH rastreando: <em>Failed password</em>, <em>Invalid user</em> ou <em>Accepted
+                                    password</em>.</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">last | lastlog</span> <span class="desc">Monitorar acessos fora do
+                                horário (after-hours), logins suspeitos e acessos remotos inesperados (unexpected remote
+                                IPs).</span></div>
+                    </li>
+                </ul>
+
+                <div class="category-title">Windows Event Logs Essenciais</div>
+                <ul class="command-list">
+                    <li>
+                        <div style="font-size: 0.75rem; color: #7a8a9e; margin-bottom: 8px;"><strong>Onde buscar: Event
+                                Viewer &rarr; Windows Logs &rarr; Security:</strong></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">Event ID 4624</span> <span class="desc">Login Success (Logon efetuado
+                                perfeitamente).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">Event ID 4625</span> <span class="desc">Login Failure (Senha errada
+                                rastreável).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">Event ID 4740</span> <span class="desc">Account Locked (Conta de AD
+                                bloqueada por brute-force/typo).</span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">Event ID 4672</span> <span class="desc">Special Privileges (Privilégio de
+                                Administrador usado para escalar).</span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Best Practices & Official Guidelines</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">CIS Controls (Center for Internet Security)</span>
+                        <span class="tool-desc">
+                            Diretrizes reais anti-ataque. <a href="https://www.cisecurity.org/controls" target="_blank"
+                                style="color: #ff79c6; text-decoration: none; font-weight: bold;">Acessar Guias CIS</a>
+                        </span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">ISO/IEC 27001 (Information Security)</span>
+                        <span class="tool-desc">
+                            Implementação de Segurança Cibernética global. <a
+                                href="https://www.iso.org/isoiec-27001-information-security.html" target="_blank"
+                                style="color: #ff79c6; text-decoration: none; font-weight: bold;">Acessar Padrão ISO</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 11 -->
+            <div class="card" id="mod-11">
+                <div class="card-header">
+                    <h2>11 SQL Support Queries</h2>
+                </div>
+
+                <div class="category-title">Troubleshooting Real (Infra/Suporte)</div>
+                <ul class="command-list">
+                    <li>
+                        <div style="font-size: 0.75rem; color: #7a8a9e; margin-bottom: 8px;"><strong>Visão de Infra:
+                                Como achar o processo isolado que travou a Aplicação:</strong></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">MSSQL: Identificar Blockings</span> <span class="desc">Acha a query
+                                matando o app server:<br><code
+                                    style="font-size: 0.70rem; color: #f8f8f2;">SELECT blocking_session_id, session_id FROM sys.dm_exec_requests WHERE blocking_session_id <> 0;</code></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">PostgreSQL: Monitorar Atividade</span> <span class="desc">Acompanha
+                                queries travadas ativas:<br><code
+                                    style="font-size: 0.70rem; color: #f8f8f2;">SELECT * FROM pg_stat_activity;</code></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">MSSQL: Ver tamanho das Databases</span> <span
+                                class="desc">Datastore/Disco apitou cheio? Veja bancos:<br><code
+                                    style="font-size: 0.70rem; color: #f8f8f2;">EXEC sp_databases;</code></span></div>
+                    </li>
+                    <li>
+                        <div><span class="cmd">MySQL: Conexões Ativas e Presas</span> <span class="desc">Se o
+                                connection_pool do app estourou o limite:<br><code
+                                    style="font-size: 0.70rem; color: #f8f8f2;">SHOW PROCESSLIST;</code></span></div>
+                    </li>
+                </ul>
+
+                <div class="tools-section">
+                    <h4>Tools that help in real troubleshooting</h4>
+                    <div class="tool-item">
+                        <span class="tool-name">SQL Server Mgmt Studio (SSMS)</span>
+                        <span class="tool-desc">Client corporativo oficial Microsoft. Use o botão interno de "Activity
+                            Monitor" para dar kill nativo em SPIDs Presos.</span>
+                    </div>
+                    <div class="tool-item">
+                        <span class="tool-name">DBeaver</span>
+                        <span class="tool-desc">Client Universal Open-Source (Multi-SGBD). Permite ao analista conectar
+                            de forma segura no Postgres/MySQL em uma janela só.</span>
+                    </div>
+                </div>
+            </div>
+
+            <footer
+                style="text-align: center; margin-top: 40px; padding: 20px 0 40px 0; background: transparent; color: #f8f8f2; font-size: 0.85rem;">
+                <div style="margin-bottom: 12px; font-weight: 300;">
+                    <span
+                        style="text-transform: uppercase; font-size: 0.70rem; letter-spacing: 1px; color: #cbd5e1;">Built
+                        by</span><br>
+                    <span style="font-size: 1.1rem; font-weight: 600; margin-top: 4px; display: inline-block;">Gabrielli
+                        Verissimo</span><br>
+                    <span
+                        style="font-size: 0.8rem; color: #94a3b8; display: inline-block; margin-top: 2px;">Infrastructure
+                        & Cloud Support</span>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 20px; opacity: 0.9;">
+                    <a href="https://linkedin.com/in/gabrielliverissimo" target="_blank"
+                        style="color: #00e5ff; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: opacity 0.2s;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/gaverissimo" target="_blank"
+                        style="color: #00e5ff; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: opacity 0.2s;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                        GitHub
+                    </a>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Conta todos os items categorizados como comandos
+            const TotalCommands = document.querySelectorAll('.command-list li').length;
+            document.getElementById('real-cmd-count').textContent = TotalCommands;
+
+            // View transition mapping SPA tabs
+            const links = document.querySelectorAll('.nav-links a');
+            const sections = document.querySelectorAll('.card');
+
+            // Scroll manual direto para o card
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        // Calcula posição exata
+                        const offsetTop = targetElement.offsetTop - 50;
+                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                        window.history.pushState(null, null, targetId);
+                    }
+                });
+            });
+
+            // Atualiza classe "active" do menu lateral à medida que dá scroll
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    // se passou da tela superior com algum limite de folga
+                    if (window.scrollY >= (sectionTop - 150)) {
+                        current = '#' + section.getAttribute('id');
+                    }
+                });
+
+                links.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
